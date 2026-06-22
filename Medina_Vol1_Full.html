@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мединский первый том</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa; color: #333;
+            display: flex; justify-content: center; padding: 20px; margin: 0;
+        }
+        .container {
+            background: #fff; padding: 30px; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 600px; width: 100%;
+        }
+        h2 { text-align: center; font-weight: bold; margin-top: 0; color: #2c3e50; margin-bottom: 5px; }
+        .subtitle { text-align: center; font-size: 14px; color: #7f8c8d; margin-bottom: 20px; }
+        
+        .highscore-display {
+            text-align: center; background: #f39c12; color: white; padding: 10px;
+            border-radius: 8px; font-weight: bold; font-size: 18px; margin-bottom: 20px;
+        }
+
+        .lesson-selection {
+            background: #f1f2f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;
+        }
+        .lesson-selection h3 { margin-top: 0; font-size: 16px; margin-bottom: 10px;}
+        .checkbox-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;
+        }
+        .checkbox-grid label {
+            background: #fff; padding: 8px 10px; border-radius: 6px; 
+            border: 1px solid #ddd; cursor: pointer; font-size: 14px;
+            display: flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .checkbox-grid label:hover { background: #eef2f5; }
+        .select-controls { display: flex; gap: 10px; margin-bottom: 15px;}
+        .select-controls button { flex: 1; padding: 6px; font-size: 12px; cursor: pointer;}
+        
+        select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #bdc3c7; font-size: 14px; outline: none; }
+
+        .btn {
+            background-color: #2c3e50; color: white; border: none; padding: 14px 20px;
+            border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; transition: background 0.3s; font-weight: bold;
+        }
+        .btn:hover { background-color: #1a252f; }
+        .btn-secondary { background-color: #95a5a6; margin-top: 10px;}
+        .btn-secondary:hover { background-color: #7f8c8d; }
+        .btn-star-mode { background-color: #f39c12; margin-top: 10px;}
+        .btn-star-mode:hover { background-color: #e67e22; }
+        
+        #quiz-section { display: none; text-align: center; }
+        .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .mode-btn { padding: 10px; border: 1px solid #ddd; background: #f8f9fa; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold;}
+        .mode-btn.active { background: #2c3e50; color: white; border-color: #2c3e50; }
+        .mode-fast { background: #e67e22; color: white; border-color: #e67e22; grid-column: span 2; }
+        .mode-fast.active { background: #d35400; border-color: #d35400; }
+        
+        #fast-mode-stats {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            background: #34495e; color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-weight: bold;
+        }
+        .stat-item { display: flex; justify-content: space-between; font-size: 16px; }
+        .danger-time { color: #e74c3c !important; }
+        .combo-text { color: #f1c40f; }
+
+        .card-container { position: relative; margin-bottom: 20px; }
+        .star-btn { 
+            position: absolute; top: 10px; left: 10px; font-size: 28px; cursor: pointer; 
+            background: none; border: none; z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s;
+        }
+        .star-btn:hover { transform: scale(1.1); }
+        .card {
+            background: #ecf0f1; padding: 40px 20px; border-radius: 8px; font-size: 24px;
+            min-height: 80px; display: flex; align-items: center; justify-content: center; line-height: 1.4;
+        }
+        .arabic-text { font-family: 'Times New Roman', serif; direction: rtl; font-size: 46px; }
+        
+        #options-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .option-btn {
+            background-color: #fff; color: #333; border: 2px solid #bdc3c7; padding: 12px;
+            border-radius: 6px; cursor: pointer; font-size: 18px; transition: 0.2s; text-align: center; font-weight: 500;
+        }
+        .option-btn:hover:not(:disabled) { background-color: #e0e6ed; }
+        .option-btn:disabled { cursor: not-allowed; color: #fff; }
+        .option-btn.arabic-option { font-family: 'Times New Roman', serif; font-size: 34px; direction: rtl; font-weight: normal; }
+
+        input[type="text"] {
+            width: 100%; padding: 12px; font-size: 28px; border: 2px solid #bdc3c7;
+            border-radius: 6px; box-sizing: border-box; text-align: center; direction: rtl;
+            font-family: 'Times New Roman', serif; display: none;
+        }
+        #feedback { font-size: 18px; margin: 15px 0; min-height: 24px; font-weight: bold; }
+        .correct { color: #27ae60; }
+        .incorrect { color: #e74c3c; }
+        .hidden { display: none !important; }
+        .navigation-btns { display: flex; gap: 10px; margin-top: 15px; }
+
+        @media (max-width: 480px) {
+            .checkbox-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="setup-section">
+        <h2>Мединский первый том</h2>
+        <div class="subtitle">Уроки 1-14 (Полный словарь)</div>
+        
+        <div class="highscore-display" id="highscore-banner">
+            👑 Рекорд в Выживании: <span id="highscore-val">0</span>
+        </div>
+
+        <div class="lesson-selection">
+            <h3>1. Выберите уроки:</h3>
+            <div class="select-controls">
+                <button type="button" onclick="selectAll(true)">Выбрать всё</button>
+                <button type="button" onclick="selectAll(false)">Снять всё</button>
+            </div>
+            <div class="checkbox-grid">
+                <label><input type="checkbox" class="lesson-cb" value="1" checked> Урок 1</label>
+                <label><input type="checkbox" class="lesson-cb" value="2"> Урок 2</label>
+                <label><input type="checkbox" class="lesson-cb" value="3"> Урок 3</label>
+                <label><input type="checkbox" class="lesson-cb" value="4"> Урок 4</label>
+                <label><input type="checkbox" class="lesson-cb" value="5"> Урок 5</label>
+                <label><input type="checkbox" class="lesson-cb" value="6"> Урок 6</label>
+                <label><input type="checkbox" class="lesson-cb" value="7"> Урок 7</label>
+                <label><input type="checkbox" class="lesson-cb" value="8"> Урок 8</label>
+                <label><input type="checkbox" class="lesson-cb" value="9"> Урок 9</label>
+                <label><input type="checkbox" class="lesson-cb" value="10"> Урок 10</label>
+                <label><input type="checkbox" class="lesson-cb" value="12"> Урок 12</label>
+                <label><input type="checkbox" class="lesson-cb" value="13"> Урок 13</label>
+                <label><input type="checkbox" class="lesson-cb" value="14"> Урок 14</label>
+            </div>
+
+            <h3>2. Количество слов для тренировки:</h3>
+            <select id="word-count">
+                <option value="15">15 слов (новые в приоритете)</option>
+                <option value="30" selected>30 слов (новые в приоритете)</option>
+                <option value="50">50 слов (новые в приоритете)</option>
+                <option value="all">Все слова из выбранных уроков</option>
+            </select>
+        </div>
+
+        <button class="btn" onclick="startQuiz(false)">Начать тренировку</button>
+        <button class="btn btn-star-mode" onclick="startQuiz(true)">⭐ Тренировать только трудные</button>
+    </div>
+
+    <div id="quiz-section">
+        <div class="modes">
+            <button class="mode-btn active" onclick="setMode('ar-ru')" id="btn-ar-ru">Араб→Рус</button>
+            <button class="mode-btn" onclick="setMode('ru-ar')" id="btn-ru-ar">Рус→Араб</button>
+            <button class="mode-btn" onclick="setMode('type-ar')" id="btn-type-ar">Письмо</button>
+            <button class="mode-btn" onclick="setMode('mix')" id="btn-mix">🔀 Mix</button>
+            <button class="mode-btn mode-fast" onclick="setMode('fast')" id="btn-fast">⚡ Выживание</button>
+        </div>
+
+        <div id="fast-mode-stats" class="hidden">
+            <div class="stat-item"><span>Очки:</span> <span id="score-display">0</span></div>
+            <div class="stat-item"><span>Жизни:</span> <span id="lives-display">❤️❤️❤️</span></div>
+            <div class="stat-item"><span id="timer-display">⏳ 7 сек</span></div>
+            <div class="stat-item"><span class="combo-text">Комбо:</span> <span id="combo-display" class="combo-text">x1</span></div>
+        </div>
+
+        <div class="card-container">
+            <button class="star-btn" id="star-btn" onclick="toggleStar()" title="Отметить как трудное">☆</button>
+            <div class="card" id="question-card">Вопрос</div>
+        </div>
+        
+        <div id="options-container"></div>
+        <input type="text" id="answer-input" placeholder="Напишите на арабском..." autocomplete="off">
+        
+        <div id="feedback"></div>
+
+        <button class="btn hidden" id="check-btn" onclick="checkTypedAnswer()">Проверить написание</button>
+        
+        <div class="navigation-btns">
+            <button class="btn btn-secondary" id="back-btn" onclick="goBack()" style="margin-top: 0;">← Назад</button>
+            <button class="btn btn-secondary hidden" id="next-btn" onclick="handleNextClick()" style="margin-top: 0;">Дальше →</button>
+        </div>
+        
+        <button class="btn btn-secondary" onclick="backToSetup()" style="margin-top: 30px;">🏠 В главное меню</button>
+    </div>
+</div>
+
+<script>
+    const dictionary = {
+        "1": [
+            { ar: "هَذَا", ru: "Это, этот" }, { ar: "هَؤُلَاءِ", ru: "Эти" },
+            { ar: "مَسْجِدٌ", ru: "Мечеть" }, { ar: "مَسَاجِدُ", ru: "Мечети" },
+            { ar: "بَابٌ", ru: "Дверь" }, { ar: "أَبْوَابٌ", ru: "Двери" },
+            { ar: "كِتَابٌ", ru: "Книга" }, { ar: "كُتُبٌ", ru: "Книги" },
+            { ar: "قَلَمٌ", ru: "Ручка" }, { ar: "أَقْلَامٌ", ru: "Ручки" },
+            { ar: "مِفْتَاحٌ", ru: "Ключ" }, { ar: "مَفَاتِيحُ", ru: "Ключи" },
+            { ar: "مَكْتَبٌ", ru: "Письменный стол" }, { ar: "مَكَاتِبُ", ru: "Письменные столы" },
+            { ar: "سَرِيرٌ", ru: "Кровать" }, { ar: "سُرُرٌ", ru: "Кровати" }, { ar: "أَسِرَّةٌ", ru: "Кровати (мн.ч. 2)" },
+            { ar: "كُرْسِيٌّ", ru: "Стул" }, { ar: "كَرَاسِي", ru: "Стулья" },
+            { ar: "مَا هَذِهِ", ru: "Что это? (ж.р.)" }, { ar: "مَا هَذَا", ru: "Что это? (м.р.)" },
+            { ar: "قَمِيصٌ", ru: "Рубашка" }, { ar: "قُمْصَانٌ", ru: "Рубашки" },
+            { ar: "نَجْمٌ", ru: "Звезда" }, { ar: "نُجُومٌ", ru: "Звезды" },
+            { ar: "بَيْتٌ", ru: "Дом" }, { ar: "بُيُوتٌ", ru: "Дома" },
+            { ar: "مَنْ هَؤُلَاءِ", ru: "Кто эти?" }, { ar: "مَنْ هَذَا", ru: "Кто это?" },
+            { ar: "وَلَدٌ", ru: "Мальчик (ребенок)" }, { ar: "أَوْلَادٌ", ru: "Мальчики" },
+            { ar: "رَجُلٌ", ru: "Мужчина" }, { ar: "رِجَالٌ", ru: "Мужчины" },
+            { ar: "تَاجِرٌ", ru: "Торговец" }, { ar: "تُجَّارٌ", ru: "Торговцы" },
+            { ar: "كَلْبٌ", ru: "Пёс (собака)" }, { ar: "كِلَابٌ", ru: "Собаки" },
+            { ar: "قِطٌّ", ru: "Кот (кошка)" }, { ar: "قِطَطٌ", ru: "Коты" },
+            { ar: "حِمَارٌ", ru: "Осёл" }, { ar: "حَمِيرٌ", ru: "Ослы" }, { ar: "حُمُرٌ", ru: "Ослы (мн.ч. 2)" },
+            { ar: "حِصَانٌ", ru: "Конь" }, { ar: "أَحْصِنَةٌ", ru: "Кони" },
+            { ar: "جَمَلٌ", ru: "Верблюд (самец)" }, { ar: "جِمَالٌ", ru: "Верблюды" },
+            { ar: "دِيكٌ", ru: "Петух" }, { ar: "دِيَكَةٌ", ru: "Петухи" },
+            { ar: "مُدَرِّسٌ", ru: "Учитель" }, { ar: "مُدَرِّسُونَ", ru: "Учителя" },
+            { ar: "مِنْدِيلٌ", ru: "Носовой платок, салфетка" }, { ar: "مَنَادِيلُ", ru: "Платки" }
+        ],
+        "2": [
+            { ar: "ذَلِكَ", ru: "То, тот" }, { ar: "أُولَئِكَ", ru: "Те" },
+            { ar: "إِمَامٌ", ru: "Имам" }, { ar: "أَئِمَّةٌ", ru: "Имамы" },
+            { ar: "مَا ذَلِكَ", ru: "Что то? (м.р.)" }, { ar: "مَا تِلْكَ", ru: "Что то? (ж.р.)" },
+            { ar: "حَجَرَةٌ", ru: "Один камень" }, { ar: "حَجَرٌ", ru: "Камень (собират.)" },
+            { ar: "أَحْجَارٌ", ru: "Камни" }, { ar: "حِجَارَةٌ", ru: "Камни (мн.ч. 2)" }, { ar: "حَجَرَاتٌ", ru: "Много камней (от 3 до 10)" },
+            { ar: "سُكَّرٌ", ru: "Сахар" },
+            { ar: "لَبَنٌ", ru: "Молоко" }, { ar: "أَلْبَانٌ", ru: "Молоко (мн.ч.)" },
+            { ar: "وَرَقٌ", ru: "Бумага (собират.)" }, { ar: "وَرَقَةٌ", ru: "Лист бумаги" },
+            { ar: "أَوْرَاقٌ", ru: "Бумаги (мн.ч.)" }, { ar: "وَرَقَاتٌ", ru: "Много листов бумаги (от 3 до 10)" },
+            { ar: "لَوْحٌ", ru: "Доска (собират.)" }, { ar: "لَوْحَةٌ", ru: "Одна доска" },
+            { ar: "أَلْوَاحٌ", ru: "Доски (мн.ч.)" }, { ar: "لَوْحَاتٌ", ru: "Много досок (от 3 до 10)" }
+        ],
+        "3": [
+            { ar: "مَكْسُورٌ", ru: "Сломанный" },
+            { ar: "جَالِسٌ", ru: "Сидячий" }, { ar: "جَالِسُونَ", ru: "Сидящие" }, { ar: "جُلُوسٌ", ru: "Сидящие (вар. 2)" },
+            { ar: "وَاقِفٌ", ru: "Стоячий" }, { ar: "وَاقِفُونَ", ru: "Стоящие" }, { ar: "وُقُوفٌ", ru: "Стоящие (вар. 2)" },
+            { ar: "جَدِيدٌ", ru: "Новый" }, { ar: "جُدُدٌ", ru: "Новые" },
+            { ar: "قَدِيمٌ", ru: "1) Старый 2) Давний 3) Древний" }, { ar: "قُدَامَى", ru: "Старые" }, { ar: "قُدَمَاءُ", ru: "Древние" },
+            { ar: "قَمَرٌ", ru: "Луна" }, { ar: "أَقْمَارٌ", ru: "Луны" },
+            { ar: "وَسِخٌ", ru: "Грязный" }, { ar: "وُسَخَاءُ", ru: "Грязные" },
+            { ar: "نَظِيفٌ", ru: "Чистый" }, { ar: "نُظَفَاءُ", ru: "Чистые" },
+            { ar: "حَارٌّ", ru: "Горячий" },
+            { ar: "بَارِدٌ", ru: "Холодный" },
+            { ar: "مَفْتُوحٌ", ru: "Открытый" },
+            { ar: "ثَقِيلٌ", ru: "Тяжёлый" }, { ar: "ثِقَالٌ", ru: "Тяжёлые" },
+            { ar: "صَغِيرٌ", ru: "Маленький" }, { ar: "صِغَارٌ", ru: "Маленькие" },
+            { ar: "كَبِيرٌ", ru: "Большой / Старший" }, { ar: "كِبَارٌ", ru: "Большие / Взрослые" },
+            { ar: "خَفِيفٌ", ru: "Лёгкий" }, { ar: "خِفَافٌ", ru: "Лёгкие" },
+            { ar: "جَمِيلٌ", ru: "Красивый" }, { ar: "جُمَلَاءُ", ru: "Красивые" },
+            { ar: "طَالِبٌ", ru: "Студент" }, { ar: "طُلَّابٌ", ru: "Студенты" }, { ar: "طَلَبَةٌ", ru: "Студенты (вар. 2)" },
+            { ar: "بَعِيدٌ", ru: "Далёкий" }, { ar: "بُعَدَاءُ", ru: "Далёкие" },
+            { ar: "حُلْوٌ", ru: "Сладкий" },
+            { ar: "مَرِيضٌ", ru: "Больной" }, { ar: "مَرْضَى", ru: "Больные" },
+            { ar: "غَنِيٌّ", ru: "Богатый" }, { ar: "أَغْنِيَاءُ", ru: "Богатые" },
+            { ar: "فَقِيرٌ", ru: "Бедный" }, { ar: "فُقَرَاءُ", ru: "Бедные" },
+            { ar: "لَذِيذٌ", ru: "Вкусный" },
+            { ar: "طَوِيلٌ", ru: "Длинный / Высокий" }, { ar: "طِوَالٌ", ru: "Длинные / Высокие" },
+            { ar: "قَصِيرٌ", ru: "Короткий / Невысокого роста" }, { ar: "قِصَارٌ", ru: "Короткие" },
+            { ar: "دُكَّانٌ", ru: "Магазин" }, { ar: "دَكَاكِينُ", ru: "Магазины" },
+            { ar: "تُفَّاحَةٌ", ru: "Одно яблоко" }, { ar: "تُفَّاحٌ", ru: "Яблоко (собират.)" },
+            { ar: "أَبٌ", ru: "Отец" }, { ar: "آبَاءٌ", ru: "Отцы" },
+            { ar: "جَنَّةٌ", ru: "Сад / Рай" }, { ar: "جَنَّاتٌ", ru: "Сады" }, { ar: "جِنَانٌ", ru: "Райские сады" },
+            { ar: "خُبْزٌ", ru: "Хлеб" },
+            { ar: "عَيْنٌ", ru: "Глаз / Родник" }, { ar: "أَعْيُنٌ", ru: "Глаза" }, { ar: "عُيُونٌ", ru: "Родники" },
+            { ar: "غَدَاءٌ", ru: "Обед" }, { ar: "أَغْدِيَةٌ", ru: "Обеды" },
+            { ar: "فَمٌ", ru: "Рот" }, { ar: "أَفْمَامٌ", ru: "Рты" },
+            { ar: "هَوَاءٌ", ru: "Воздух" },
+            { ar: "يَدٌ", ru: "Рука" }, { ar: "أَيْدٍ", ru: "Руки" },
+            { ar: "ثَوْبٌ", ru: "Одежда" }, { ar: "ثِيَابٌ", ru: "Одежды" },
+            { ar: "ذَهَبٌ", ru: "Золото" },
+            { ar: "زَهْرَةٌ", ru: "Цветок" }, { ar: "زَهْرٌ", ru: "Цветок (собират.)" }, { ar: "أَزْهَارٌ", ru: "Цветы" }, { ar: "زُهُورٌ", ru: "Цветы (вар. 2)" },
+            { ar: "سَمَكٌ", ru: "Рыба" }, { ar: "أَسْمَاكٌ", ru: "Рыбы" },
+            { ar: "شَمْسٌ", ru: "Солнце" }, { ar: "شُمُوسٌ", ru: "Солнца" },
+            { ar: "صَدْرٌ", ru: "Грудь, грудная клетка" }, { ar: "صُدُورٌ", ru: "Груди" },
+            { ar: "ضَيْفٌ", ru: "Гость" }, { ar: "ضُيُوفٌ", ru: "Гости" },
+            { ar: "ظَهْرٌ", ru: "Спина" }, { ar: "ظُهُورٌ", ru: "Спины" },
+            { ar: "لَحْمٌ", ru: "Мясо" }, { ar: "لُحُومٌ", ru: "Мяса" },
+            { ar: "دَفْتَرٌ", ru: "Тетрадь" }, { ar: "دَفَاتِرُ", ru: "Тетради" },
+            { ar: "أَخٌ", ru: "Брат" }, { ar: "إِخْوَةٌ", ru: "Братья (как родственники)" }, { ar: "إِخْوَانٌ", ru: "Братья (по религии)" },
+            { ar: "رَسُولٌ", ru: "Посланец, посланник" }, { ar: "رُسُلٌ", ru: "Посланники" },
+            { ar: "وَجْهٌ", ru: "Лицо" }, { ar: "وُجُوهٌ", ru: "Лица" }, { ar: "أَوْجُهٌ", ru: "Лица (вар. 2)" },
+            { ar: "صَدِيقٌ", ru: "Друг" }, { ar: "أَصْدِقَاءُ", ru: "Друзья" },
+            { ar: "القُرآنُ", ru: "Коран" },
+            { ar: "صَلاَةٌ", ru: "Молитва" }, { ar: "صَلَوَاتٌ", ru: "Молитвы" },
+            { ar: "الكَعْبةُ", ru: "Кааба" },
+            { ar: "رَأْسٌ", ru: "Голова" }, { ar: "رُؤُوسٌ", ru: "Головы" },
+            { ar: "إِصْبَعٌ", ru: "Палец" }, { ar: "أَصَابِعُ", ru: "Пальцы" },
+            { ar: "ظُفْرٌ", ru: "Ноготь" }, { ar: "أَظْفَارٌ", ru: "Ногти" }, { ar: "أَظَافِرُ", ru: "Ногти (вар. 2)" },
+            { ar: "فَجْرٌ", ru: "Утренняя заря" },
+            { ar: "ظُهْرٌ", ru: "Полдень" },
+            { ar: "عَصْرٌ", ru: "Послеполуденное время" },
+            { ar: "مَغْرِبٌ", ru: "Закат, Запад, Марокко" },
+            { ar: "عِشَاءٌ", ru: "Сумерки, вечер" }
+        ],
+        "4": [
+            { ar: "أَيْنَ", ru: "Где ?" },
+            { ar: "غُرْفَةٌ", ru: "Комната" }, { ar: "غُرَفٌ", ru: "Комнаты" },
+            { ar: "حَمَّامٌ", ru: "Ванная" }, { ar: "حَمَّامَاتٌ", ru: "Ванные" },
+            { ar: "هُوَ", ru: "Он" }, { ar: "هُمْ", ru: "Они (м.р.)" },
+            { ar: "هِيَ", ru: "Она" }, { ar: "هُنَّ", ru: "Они (ж.р.)" },
+            { ar: "مَطْبَخٌ", ru: "Кухня" }, { ar: "مَطَابِخُ", ru: "Кухни" },
+            { ar: "سَاعَةٌ", ru: "Часы" }, { ar: "سَاعَاتٌ", ru: "Часы (мн.ч.)" },
+            { ar: "مَاذَا", ru: "Что?" },
+            { ar: "مَدْرَسَةٌ", ru: "Школа" }, { ar: "مَدَارِسُ", ru: "Школы" },
+            { ar: "جَامِعَةٌ", ru: "Университет" }, { ar: "جَامِعَاتٌ", ru: "Университеты" },
+            { ar: "فَصْلٌ", ru: "Класс" }, { ar: "فُصُولٌ", ru: "Классы" },
+            { ar: "مِرْحَاضٌ", ru: "Туалет" }, { ar: "مَرَاحِيضُ", ru: "Туалеты" },
+            { ar: "سَمَاءٌ", ru: "Небо" }, { ar: "سَمَاوَاتٌ", ru: "Небеса" },
+            { ar: "مِنْ أَيْنَ", ru: "Откуда ?" },
+            { ar: "مُدِيرٌ", ru: "Директор" }, { ar: "مُدَرَاءُ", ru: "Директора" },
+            { ar: "اَلْيَابَانُ", ru: "Япония" },
+            { ar: "اَلصِّينُ", ru: "Китай" },
+            { ar: "اَلْهِنْدُ", ru: "Индия" },
+            { ar: "اَلْفِلِبِّينُ", ru: "Филиппины" },
+            { ar: "خَرَجَ", ru: "Вышел" }, { ar: "خُرُوجٌ", ru: "Выход" },
+            { ar: "ذَهَبَ", ru: "Ушел" }, { ar: "ذَهَابٌ", ru: "Уход" },
+            { ar: "سُوقٌ", ru: "Рынок" }, { ar: "أَسْوَاقٌ", ru: "Рынки" },
+            { ar: "قَرِيبٌ", ru: "Близкий / Родственник" }, { ar: "أَقْرِبَاءُ", ru: "Родственники" },
+            { ar: "مَاءٌ", ru: "Вода" }, { ar: "مِيَاهٌ", ru: "Воды" },
+            { ar: "فِي", ru: "В, внутри" },
+            { ar: "عَلَى", ru: "На" },
+            { ar: "مِنْ", ru: "От, с, из" },
+            { ar: "إِلَى", ru: "К, на, в" }
+        ],
+        "5": [
+            { ar: "اِسْمٌ", ru: "Имя" }, { ar: "أَسْمَاءٌ", ru: "Имена" },
+            { ar: "اِبْنٌ", ru: "Сын" }, { ar: "أَبْنَاءٌ", ru: "Сыновья" }, { ar: "بَنُونَ", ru: "Сыновья (вар. 2)" },
+            { ar: "حَقِيبَةٌ", ru: "Сумка" }, { ar: "حَقَائِبُ", ru: "Сумки" },
+            { ar: "عَمٌّ", ru: "Дядя со стороны отца" }, { ar: "أَعْمَامٌ", ru: "Дяди (по отцу)" },
+            { ar: "سَيَّارَةٌ", ru: "Машина" }, { ar: "سَيَّارَاتٌ", ru: "Машины" },
+            { ar: "خَالٌ", ru: "Дядя со стороны матери" }, { ar: "أَخْوَالٌ", ru: "Дяди (по матери)" },
+            { ar: "شَارِعٌ", ru: "Улица" }, { ar: "شَوَارِعُ", ru: "Улицы" },
+            { ar: "مُغْلَقٌ", ru: "Закрытый" },
+            { ar: "تَحْتَ", ru: "Под" },
+            { ar: "هُنَاكَ", ru: "Там" },
+            { ar: "مُهَنْدِسٌ", ru: "Инженер" }, { ar: "مُهَنْدِسُونَ", ru: "Инженеры" },
+            { ar: "بِنْتٌ", ru: "Дочь" }, { ar: "بَنَاتٌ", ru: "Дочери" }
+        ],
+        "6": [
+            { ar: "أُخْتٌ", ru: "Сестра" }, { ar: "أَخَوَاتٌ", ru: "Сестры" },
+            { ar: "مِكْوَاةٌ", ru: "Утюг" }, { ar: "مَكَاوٍ", ru: "Утюги" }, { ar: "مِكْوَيَاتٌ", ru: "Утюги (вар. 2)" },
+            { ar: "دَرَّاجَةٌ", ru: "Велосипед" }, { ar: "دَرَّاجَاتٌ", ru: "Велосипеды" },
+            { ar: "مِلْعَقَةٌ", ru: "Ложка" }, { ar: "مَلَاعِقُ", ru: "Ложки" },
+            { ar: "قِدْرٌ", ru: "Котелок, казан" }, { ar: "قُدُورٌ", ru: "Котелки, казаны" },
+            { ar: "بَقَرَةٌ", ru: "Корова" }, { ar: "أَبْقَارٌ", ru: "Коровы" }, { ar: "بَقَرٌ", ru: "Корова (собират.)" },
+            { ar: "فَلَّاحٌ", ru: "Земледелец" }, { ar: "فَلَّاحُونَ", ru: "Земледельцы" },
+            { ar: "أَنْفٌ", ru: "Нос" }, { ar: "أُنُوفٌ", ru: "Носы" },
+            { ar: "أُذُنٌ", ru: "Ухо" }, { ar: "آذَانٌ", ru: "Уши" },
+            { ar: "فَمٌ", ru: "Рот" }, { ar: "أَفْمَامٌ", ru: "Рты" },
+            { ar: "عَيْنٌ", ru: "Глаз / Родник" }, { ar: "أَعْيُنٌ", ru: "Глаза / Родники" }, { ar: "عُيُونٌ", ru: "Глаза / Родники (вар.2)" },
+            { ar: "رِجْلٌ", ru: "Нога" }, { ar: "أَرْجُلٌ", ru: "Ноги" },
+            { ar: "دَجَاجَةٌ", ru: "Курица" }, { ar: "دَجَاجَاتٌ", ru: "Курицы" },
+            { ar: "ثَلَّاجَةٌ", ru: "Холодильник" }, { ar: "ثَلَّاجَاتٌ", ru: "Холодильники" },
+            { ar: "أُمٌّ", ru: "Мать" }, { ar: "أُمَّهَاتٌ", ru: "Матери" },
+            { ar: "مَشْرِقٌ", ru: "Восток / Восход" }, { ar: "مَشَارِقُ", ru: "Востоки" },
+            { ar: "سَرِيعٌ", ru: "Быстрый" }, { ar: "سِرَاعٌ", ru: "Быстрые" },
+            { ar: "أَيْضاً", ru: "Тоже" }, { ar: "جِدّاً", ru: "Очень" }, { ar: "مُغْلَقٌ", ru: "Закрытый" },
+            { ar: "شَايٌ", ru: "Чай" }, { ar: "قَهْوَةٌ", ru: "Кофе" }
+        ],
+        "7": [
+            { ar: "تِلْكَ", ru: "Та или то (вдали, ж.р.)" }, { ar: "أُولَئِكَ", ru: "Те (вдали)" },
+            { ar: "مُمَرِّضَةٌ", ru: "Медсестра" }, { ar: "مُمَرِّضَاتٌ", ru: "Медсестры" },
+            { ar: "طَوِيلَةٌ", ru: "Высокая" }, { ar: "طِوَالٌ", ru: "Высокие" },
+            { ar: "بَطَّةٌ", ru: "Утка" }, { ar: "بَطٌّ", ru: "Утки (собират.)" },
+            { ar: "بَيْضَةٌ", ru: "Яйцо" }, { ar: "بُيُوضٌ", ru: "Яйца" }, { ar: "بَيْضٌ", ru: "Яйца (собират.)" },
+            { ar: "نَاقَةٌ", ru: "Верблюдица" }, { ar: "نُوقٌ", ru: "Верблюдицы" },
+            { ar: "مُؤَذِّنٌ", ru: "Муэдзин" }, { ar: "مُؤَذِّنُونَ", ru: "Муэдзины" },
+            { ar: "سِكِّينٌ", ru: "Нож" }, { ar: "سَكَاكِينُ", ru: "Ножи" },
+            { ar: "الهِنْدُ", ru: "Индия" }, { ar: "اليَابَانُ", ru: "Япония" }
+        ],
+        "8": [
+            { ar: "أَمَامَ", ru: "Перед" }, { ar: "خَلْفَ", ru: "Позади, за, сзади" },
+            { ar: "لِمَنْ", ru: "Чей? Чья? Чьё?" },
+            { ar: "أَمْرِيكَا", ru: "Америка" }, { ar: "الصِّينُ", ru: "Китай" },
+            { ar: "إِنْكِلْتِرَا", ru: "Англия" }, { ar: "سُوِيسْرَا", ru: "Швейцария" }
+        ],
+        "9": [
+            { ar: "فَاكِهَةٌ", ru: "Фрукт" }, { ar: "فَوَاكِهُ", ru: "Фрукты" },
+            { ar: "عُصْفُورٌ", ru: "Воробей" }, { ar: "عَصَافِيرُ", ru: "Воробьи" },
+            { ar: "طَائِرٌ", ru: "Птица" }, { ar: "طُيُورٌ", ru: "Птицы" }, { ar: "طَيْرٌ", ru: "Птицы (вар.2)" },
+            { ar: "لُغَةٌ", ru: "Язык" }, { ar: "لُغَاتٌ", ru: "Языки" },
+            { ar: "مُجْتَهِدٌ", ru: "Старательный" }, { ar: "مُجْتَهِدُونَ", ru: "Старательные" },
+            { ar: "شَهِيرٌ", ru: "Известный" }, { ar: "شُهَرَاءُ", ru: "Известные" },
+            { ar: "جَوْعَانُ", ru: "Голодный (м.р.)" }, { ar: "جَوْعَى", ru: "Голодная (ж.р.)" }, { ar: "جِيَاعٌ", ru: "Голодные" },
+            { ar: "كَسْلَانُ", ru: "Ленивый (м.р.)" }, { ar: "كَسْلَى", ru: "Ленивая (ж.р.)" }, { ar: "كُسَالَى", ru: "Ленивые" },
+            { ar: "عَطْشَانُ", ru: "Жаждущий (м.р.)" }, { ar: "عَطْشَى", ru: "Жаждущая (ж.р.)" }, { ar: "عِطَاشٌ", ru: "Жаждущие" },
+            { ar: "غَضْبَانُ", ru: "Гневный (м.р.)" }, { ar: "غَضْبَى", ru: "Гневная (ж.р.)" }, { ar: "غِضَابٌ", ru: "Гневные" },
+            { ar: "مَلْآنُ", ru: "Наполненный, полный" },
+            { ar: "يَوْمٌ", ru: "День" }, { ar: "أَيَّامٌ", ru: "Дни" },
+            { ar: "مُسْتَوْصَفٌ", ru: "Поликлиника" }, { ar: "مُسْتَوْصَفَاتٌ", ru: "Поликлиники" },
+            { ar: "وَزِيرٌ", ru: "Министр" }, { ar: "وُزَرَاءُ", ru: "Министры" },
+            { ar: "مَكْتَبَةٌ", ru: "Библиотека" }, { ar: "مَكْتَبَاتٌ", ru: "Библиотеки" },
+            { ar: "مِرْوَحَةٌ", ru: "Вентилятор" }, { ar: "مَرَاوِحُ", ru: "Вентиляторы" },
+            { ar: "كُوبٌ", ru: "Стакан (с жидкостью)" }, { ar: "أَكْوَابٌ", ru: "Стаканы" },
+            { ar: "سَهْلٌ", ru: "Лёгкий, доступный" }, { ar: "حَادٌّ", ru: "Острый" },
+            { ar: "مَدْرَسَةٌ ثَانَوِيَّةٌ", ru: "Старшие классы (школа)" },
+            { ar: "اليَوْمَ", ru: "Сегодня" }, { ar: "عِنْدَ", ru: "У, при, возле" }, { ar: "هُنَاكَ", ru: "Там" },
+            { ar: "القَاهِرَةُ", ru: "Каир" }, { ar: "إِنْدُونِيسِيَا", ru: "Индонезия" }, { ar: "إِنْكِلِيزِيَّةٌ", ru: "Английский (язык)" }
+        ],
+        "10": [
+            { ar: "فَتًى", ru: "Подросток (юноша)" }, { ar: "فِتْيَةٌ", ru: "Подростки" },
+            { ar: "زَمِيلٌ", ru: "Коллега, однокурсник" }, { ar: "زُمَلَاءُ", ru: "Коллеги" },
+            { ar: "زَوْجٌ", ru: "Муж или жена (супруг)" }, { ar: "أَزْوَاجٌ", ru: "Мужья или жены" },
+            { ar: "طِفْلٌ", ru: "Ребёнок" }, { ar: "أَطْفَالٌ", ru: "Дети" },
+            { ar: "أَخٌ", ru: "Брат" }, { ar: "إِخْوَةٌ", ru: "Братья" }, { ar: "إِخْوَانٌ", ru: "Братья (вар. 2)" },
+            { ar: "وَاحِدٌ", ru: "Один" }, { ar: "مَعَ", ru: "С (вместе с)" }, { ar: "الكُوَيْتُ", ru: "Кувейт" }
+        ],
+        "12": [
+            { ar: "حَالٌ", ru: "Состояние, самочувствие" }, { ar: "أَحْوَالٌ", ru: "Состояния" }, { ar: "حَالَاتٌ", ru: "Состояния (вар.2)" },
+            { ar: "مُوَجِّهٌ", ru: "Завуч" }, { ar: "مُوَجِّهُونَ", ru: "Завучи" },
+            { ar: "شَجَرَةٌ", ru: "Дерево" }, { ar: "أَشْجَارٌ", ru: "Деревья" }, { ar: "شَجَرٌ", ru: "Дерево (собират.)" },
+            { ar: "عَمٌّ", ru: "Дядя (по отцу)" }, { ar: "أَعْمَامٌ", ru: "Дяди (по отцу)" },
+            { ar: "عَمَّةٌ", ru: "Тётя (по отцу)" }, { ar: "عَمَّاتٌ", ru: "Тёти (по отцу)" },
+            { ar: "خَالٌ", ru: "Дядя (по матери)" }, { ar: "أَخْوَالٌ", ru: "Дяди (по матери)" },
+            { ar: "خَالَةٌ", ru: "Тётя (по матери)" }, { ar: "خَالَاتٌ", ru: "Тёти (по матери)" },
+            { ar: "كَيْفَ", ru: "Как?" }, { ar: "بِخَيْرٍ", ru: "Всё в порядке" }, { ar: "هُنَا", ru: "Здесь" },
+            { ar: "مُسْتَشْفَى الْوِلَادَةِ", ru: "Роддом" }, { ar: "مَدْرَسَةٌ مُتَوَسِّطَةٌ", ru: "Средние классы (5-9 кл.)" },
+            { ar: "الَّتِي", ru: "Которая" }, { ar: "اللَّوَاتِي", ru: "Которые (ж.р.)" }, { ar: "اللَّاتِي", ru: "Которые (ж.р. вар.2)" },
+            { ar: "بَعْدَ", ru: "После" }
+        ],
+        "13": [
+            { ar: "مَطْعَمٌ", ru: "Столовая" }, { ar: "مَطَاعِمُ", ru: "Столовые" },
+            { ar: "مَلْعَبٌ", ru: "Стадион, спортплощадка" }, { ar: "مَلَاعِبُ", ru: "Стадионы" },
+            { ar: "قَرْيَةٌ", ru: "Село" }, { ar: "قُرًى", ru: "Села" },
+            { ar: "طَوِيلٌ", ru: "Высокий / Длинный" }, { ar: "طِوَالٌ", ru: "Высокие / Длинные" },
+            { ar: "طَالِبٌ", ru: "Студент" }, { ar: "طُلَّابٌ", ru: "Студенты" }, { ar: "طَلَبَةٌ", ru: "Студенты (вар.2)" },
+            { ar: "جَدِيدٌ", ru: "Новый" }, { ar: "جُدُدٌ", ru: "Новые" },
+            { ar: "اِسْمٌ", ru: "Имя" }, { ar: "أَسْمَاءٌ", ru: "Имена" },
+            { ar: "رَجُلٌ", ru: "Мужчина" }, { ar: "رِجَالٌ", ru: "Мужчины" },
+            { ar: "قَصِيرٌ", ru: "Короткий / Невысокого роста" }, { ar: "قِصَارٌ", ru: "Короткие" },
+            { ar: "حَاجٌّ", ru: "Паломник" }, { ar: "حُجَّاجٌ", ru: "Паломники" }, { ar: "حَجِيجٌ", ru: "Паломники (вар.2)" },
+            { ar: "صَدِيقٌ", ru: "Друг" }, { ar: "أَصْدِقَاءُ", ru: "Друзья" },
+            { ar: "تَاجِرٌ", ru: "Торговец" }, { ar: "تُجَّارٌ", ru: "Торговцы" },
+            { ar: "كَبِيرٌ", ru: "Большой / Старший" }, { ar: "كِبَارٌ", ru: "Большие" },
+            { ar: "وَلَدٌ", ru: "Мальчик (ребенок)" }, { ar: "أَوْلَادٌ", ru: "Мальчики" },
+            { ar: "اِبْنٌ", ru: "Сын" }, { ar: "أَبْنَاءٌ", ru: "Сыновья" },
+            { ar: "شَيْخٌ", ru: "Старик / Учёный" }, { ar: "شُيُوخٌ", ru: "Старики" }, { ar: "مَشَايِخُ", ru: "Учёные (мн.ч.)" },
+            { ar: "طَبِيبٌ", ru: "Врач" }, { ar: "أَطِبَّاءُ", ru: "Врачи" },
+            { ar: "مُدَرِّسٌ", ru: "Учитель" }, { ar: "مُدَرِّسُونَ", ru: "Учителя" },
+            { ar: "مُهَنْدِسٌ", ru: "Инженер" }, { ar: "مُهَنْدِسُونَ", ru: "Инженеры" },
+            { ar: "مُسْلِمٌ", ru: "Мусульманин" }, { ar: "مُسْلِمُونَ", ru: "Мусульмане" },
+            { ar: "سُوقٌ", ru: "Рынок" }, { ar: "أَسْوَاقٌ", ru: "Рынки" },
+            { ar: "فَصْلٌ", ru: "Класс" }, { ar: "فُصُولٌ", ru: "Классы" },
+            { ar: "إِنْسَانٌ", ru: "Человек" }, { ar: "النَّاسُ", ru: "Люди" },
+            { ar: "حَقْلٌ", ru: "Поле" }, { ar: "حُقُولٌ", ru: "Поля" },
+            { ar: "فَتَاةٌ", ru: "Девушка (подросток)" }, { ar: "فَتَيَاتٌ", ru: "Девушки" },
+            { ar: "زَمِيلَةٌ", ru: "Коллега (ж.р.)" }, { ar: "زَمِيلَاتٌ", ru: "Коллеги (ж.р.)" },
+            { ar: "بِنْتٌ", ru: "Девочка, дочь" }, { ar: "بَنَاتٌ", ru: "Девочки, дочери" },
+            { ar: "طَالِبَةٌ", ru: "Студентка" }, { ar: "طَالِبَاتٌ", ru: "Студентки" },
+            { ar: "مُدَرِّسَةٌ", ru: "Учительница" }, { ar: "مُدَرِّسَاتٌ", ru: "Учительницы" },
+            { ar: "طَبِيبَةٌ", ru: "Врач (женщина)" }, { ar: "طَبِيبَاتٌ", ru: "Врачи (женщины)" },
+            { ar: "مُسْلِمَةٌ", ru: "Мусульманка" }, { ar: "مُسْلِمَاتٌ", ru: "Мусульманки" },
+            { ar: "زَوْجَةٌ", ru: "Жена" }, { ar: "زَوْجَاتٌ", ru: "Жены" },
+            { ar: "أَبٌ", ru: "Отец" }, { ar: "آبَاءٌ", ru: "Отцы" },
+            { ar: "ضَعِيفٌ", ru: "Слабый" }, { ar: "ضِعَافٌ", ru: "Слабые" }, { ar: "ضُعَفَاءُ", ru: "Слабые (вар.2)" },
+            { ar: "وَزِيرٌ", ru: "Министр" }, { ar: "وُزَرَاءُ", ru: "Министры" },
+            { ar: "بَعْضُهُمْ", ru: "Некоторые из них (м.р.)" }
+        ],
+        "14": [
+            { ar: "طَائِرَةٌ", ru: "Самолет" }, { ar: "طَائِرَاتٌ", ru: "Самолеты" },
+            { ar: "كُلِّيَّةٌ", ru: "Факультет" }, { ar: "كُلِّيَّاتٌ", ru: "Факультеты" },
+            { ar: "شَرِيعَةٌ", ru: "Шариат" }, { ar: "شَرَائِعُ", ru: "Законы шариата" },
+            { ar: "نَصْرَانِيٌّ", ru: "Христианин" }, { ar: "نَصَارَى", ru: "Христиане" },
+            { ar: "دُكْتُورٌ", ru: "Доктор" }, { ar: "دَكَاتِرَةٌ", ru: "Доктора" },
+            { ar: "حَدِيقَةٌ", ru: "Сад" }, { ar: "حَدَائِقُ", ru: "Сады" },
+            { ar: "حَفِيدٌ", ru: "Внук" }, { ar: "حَفَدَةٌ", ru: "Внуки" }, { ar: "أَحْفَادٌ", ru: "Внуки (вар.2)" },
+            { ar: "دِينٌ", ru: "Религия" }, { ar: "أَدْيَانٌ", ru: "Религии" },
+            { ar: "رَبٌّ", ru: "Господь, хозяин" }, { ar: "أَرْبَابٌ", ru: "Господа" },
+            { ar: "شَارِعٌ", ru: "Улица" }, { ar: "شَوَارِعُ", ru: "Улицы" },
+            { ar: "مَحْكَمَةٌ", ru: "Суд" }, { ar: "مَحَاكِمُ", ru: "Суды" },
+            { ar: "سَبْتٌ", ru: "Суббота" }, { ar: "سُبُوتٌ", ru: "Субботы" },
+            { ar: "شَهْرٌ", ru: "Месяц" }, { ar: "أَشْهُرٌ", ru: "Месяцы" }, { ar: "شُهُورٌ", ru: "Месяцы (вар.2)" },
+            { ar: "بَلَدٌ", ru: "Страна, город" }, { ar: "بِلَادٌ", ru: "Страны, города" },
+            { ar: "السَّلَامُ عَلَيْكُمْ", ru: "Мир вам" }, 
+            { ar: "وَعَلَيْكُمُ السَّلَامُ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ", ru: "И вам мир, милость Аллаха и Его благословение" },
+            { ar: "كَيْفَ حَالُكَ", ru: "Как твои дела?" }, 
+            { ar: "أَنْتُمْ", ru: "Вы (мн.ч. м.р.)" },
+            { ar: "أَهْلًا وَسَهْلًا وَمَرْحَباً", ru: "Добро пожаловать" }, 
+            { ar: "شَفَاهُ اللَّهُ", ru: "Да исцелит его Аллах" },
+            { ar: "هَنْدَسَةٌ", ru: "Инженерия" }, { ar: "طِبٌّ", ru: "Медицина" }, { ar: "تِجَارَةٌ", ru: "Торговля" },
+            { ar: "إِنْكِلْتِرَا", ru: "Англия" }, 
+            { ar: "يَهْدِيَهُمَا اللَّهُ إِلَى الْإِسْلَامِ", ru: "Да наставит их Аллах к исламу" },
+            { ar: "أَيٌّ", ru: "Какой?" }, { ar: "رَجَبٌ", ru: "Раджаб" }
+        ]
+    };
+
+    let words = [];
+    let currentWord = {};
+    let mode = 'ar-ru'; 
+    let activeMode = 'ar-ru'; 
+    
+    // Память программы
+    let favorites = JSON.parse(localStorage.getItem('medina_favorites_vol1')) || [];
+    let wordStats = JSON.parse(localStorage.getItem('medina_word_stats_vol1')) || {};
+    
+    let historyStack = [];
+    let historyIdx = -1;
+    let isHistoryView = false;
+    
+    let timerInterval;
+    let pauseTimeout;
+    let timeLeft = 7;
+    let lives = 3;
+    let score = 0;
+    let combo = 0;
+    let multiplier = 1;
+    let highScore = localStorage.getItem('medina_highscore_vol1_perfect') || 0;
+
+    document.getElementById('highscore-val').innerText = highScore;
+
+    function selectAll(check) {
+        document.querySelectorAll('.lesson-cb').forEach(cb => { cb.checked = check; });
+    }
+
+    function removeHarakat(text) {
+        return text.replace(/[\u0617-\u061A\u064B-\u0652]/g, "").trim();
+    }
+    
+    function updateStarUI() {
+        const starBtn = document.getElementById('star-btn');
+        if (favorites.includes(currentWord.ar)) {
+            starBtn.innerText = '⭐';
+            starBtn.style.color = '#f1c40f';
+        } else {
+            starBtn.innerText = '☆';
+            starBtn.style.color = '#333';
+        }
+    }
+
+    function toggleStar() {
+        if (!currentWord || !currentWord.ar) return;
+        if (favorites.includes(currentWord.ar)) {
+            favorites = favorites.filter(word => word !== currentWord.ar);
+        } else {
+            favorites.push(currentWord.ar);
+        }
+        localStorage.setItem('medina_favorites_vol1', JSON.stringify(favorites));
+        updateStarUI();
+    }
+    
+    function recordWordSeen(wordAr) {
+        if (!wordStats[wordAr]) wordStats[wordAr] = 0;
+        wordStats[wordAr]++;
+        localStorage.setItem('medina_word_stats_vol1', JSON.stringify(wordStats));
+    }
+
+    function startQuiz(onlyFavorites) {
+        words = [];
+        const checkboxes = document.querySelectorAll('.lesson-cb:checked');
+        
+        checkboxes.forEach(cb => {
+            if (dictionary[cb.value] && dictionary[cb.value].length > 0) {
+                words = words.concat(dictionary[cb.value]);
+            }
+        });
+
+        if (onlyFavorites) {
+            words = words.filter(w => favorites.includes(w.ar));
+            if (words.length === 0) {
+                alert("У вас нет сохраненных трудных слов в выбранных уроках!");
+                return;
+            }
+        }
+
+        if (words.length === 0) {
+            alert("Пожалуйста, выберите хотя бы один урок.");
+            return;
+        }
+
+        // Умный алгоритм: сортируем слова по количеству показов (сначала новые/неизученные)
+        words.sort((a, b) => {
+            let countA = wordStats[a.ar] || 0;
+            let countB = wordStats[b.ar] || 0;
+            if (countA === countB) return Math.random() - 0.5; // Перемешиваем слова с одинаковым рейтингом
+            return countA - countB;
+        });
+
+        // Ограничиваем количество слов
+        const countSelect = document.getElementById('word-count').value;
+        if (countSelect !== 'all') {
+            const limit = parseInt(countSelect, 10);
+            if (words.length > limit) {
+                words = words.slice(0, limit);
+            }
+        }
+
+        // Перемешиваем отобранную порцию, чтобы слова не шли строго по частоте во время одной тренировки
+        words = shuffleArray(words);
+
+        historyStack = [];
+        historyIdx = -1;
+
+        document.getElementById('setup-section').style.display = 'none';
+        document.getElementById('quiz-section').style.display = 'block';
+        
+        if (mode === 'fast') {
+            resetFastMode();
+        }
+        nextWord();
+    }
+
+    function setMode(newMode) {
+        mode = newMode;
+        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('btn-' + newMode).classList.add('active');
+        
+        clearInterval(timerInterval);
+        clearTimeout(pauseTimeout);
+        
+        if (mode === 'fast') {
+            document.getElementById('fast-mode-stats').classList.remove('hidden');
+            resetFastMode();
+        } else {
+            document.getElementById('fast-mode-stats').classList.add('hidden');
+        }
+        
+        if (words.length > 0) nextWord();
+    }
+
+    function resetFastMode() {
+        lives = 3;
+        score = 0;
+        combo = 0;
+        multiplier = 1;
+        updateFastModeUI();
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 7;
+        updateTimerUI();
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerUI();
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                handleFastModeAnswer(null, true);
+            }
+        }, 1000);
+    }
+
+    function updateTimerUI() {
+        const timerDisplay = document.getElementById('timer-display');
+        timerDisplay.innerText = `⏳ ${timeLeft} сек`;
+        if (timeLeft <= 3) {
+            timerDisplay.classList.add('danger-time');
+        } else {
+            timerDisplay.classList.remove('danger-time');
+        }
+    }
+
+    function updateFastModeUI() {
+        document.getElementById('score-display').innerText = score;
+        document.getElementById('combo-display').innerText = `x${multiplier}`;
+        document.getElementById('lives-display').innerText = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function generateOptions(correctAnswer, langKey) {
+        let options = [correctAnswer];
+        let wrongWords = words.filter(w => w[langKey] !== correctAnswer);
+        wrongWords = shuffleArray(wrongWords);
+        
+        for (let i = 0; i < Math.min(3, wrongWords.length); i++) {
+            options.push(wrongWords[i][langKey]);
+        }
+        return shuffleArray(options);
+    }
+
+    function renderWord() {
+        const card = document.getElementById('question-card');
+        const inputField = document.getElementById('answer-input');
+        const optionsContainer = document.getElementById('options-container');
+        const feedback = document.getElementById('feedback');
+        const checkBtn = document.getElementById('check-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const backBtn = document.getElementById('back-btn');
+        
+        feedback.innerText = '';
+        inputField.value = '';
+        optionsContainer.innerHTML = '';
+        updateStarUI();
+        
+        backBtn.disabled = historyIdx <= 0;
+        
+        if (isHistoryView) {
+            nextBtn.classList.remove('hidden');
+            nextBtn.innerText = 'Вернуться к тренировке';
+            feedback.innerHTML = '<span style="color:#f39c12">Режим просмотра прошлого ответа</span>';
+        } else {
+            nextBtn.classList.add('hidden');
+            nextBtn.innerText = 'Следующее слово';
+        }
+
+        if (activeMode === 'ar-ru') {
+            card.innerHTML = `<span class="arabic-text">${currentWord.ar}</span>`;
+            inputField.style.display = 'none';
+            checkBtn.classList.add('hidden');
+            optionsContainer.style.display = 'flex';
+            const options = generateOptions(currentWord.ru, 'ru');
+            createOptionButtons(options, currentWord.ru, false);
+        } 
+        else if (activeMode === 'ru-ar' || activeMode === 'fast') {
+            card.innerText = currentWord.ru;
+            inputField.style.display = 'none';
+            checkBtn.classList.add('hidden');
+            optionsContainer.style.display = 'flex';
+            const options = generateOptions(currentWord.ar, 'ar');
+            createOptionButtons(options, currentWord.ar, true);
+            if (activeMode === 'fast' && !isHistoryView) startTimer(); 
+        }
+        else if (activeMode === 'type-ar') {
+            card.innerText = currentWord.ru;
+            optionsContainer.style.display = 'none';
+            inputField.style.display = 'block';
+            checkBtn.classList.remove('hidden');
+            if (!isHistoryView) {
+                inputField.disabled = false;
+                inputField.focus();
+            } else {
+                inputField.value = currentWord.ar;
+                inputField.disabled = true;
+                checkBtn.classList.add('hidden');
+            }
+        }
+        
+        if (isHistoryView && activeMode !== 'type-ar') {
+            document.querySelectorAll('.option-btn').forEach(b => {
+                b.disabled = true;
+                if(b.innerText === (activeMode === 'ar-ru' ? currentWord.ru : currentWord.ar)) {
+                    b.style.backgroundColor = '#27ae60';
+                    b.style.color = '#fff';
+                }
+            });
+        }
+    }
+
+    function nextWord() {
+        clearTimeout(pauseTimeout);
+        isHistoryView = false;
+        
+        if (mode === 'mix') {
+            const possibleModes = ['ar-ru', 'ru-ar', 'type-ar'];
+            activeMode = possibleModes[Math.floor(Math.random() * possibleModes.length)];
+        } else {
+            activeMode = mode;
+        }
+
+        currentWord = words[Math.floor(Math.random() * words.length)];
+        historyStack.push({ word: currentWord, am: activeMode });
+        historyIdx = historyStack.length - 1;
+        
+        renderWord();
+    }
+
+    function goBack() {
+        if (historyIdx > 0) {
+            clearTimeout(pauseTimeout);
+            clearInterval(timerInterval);
+            historyIdx--;
+            const historyItem = historyStack[historyIdx];
+            currentWord = historyItem.word;
+            activeMode = historyItem.am;
+            isHistoryView = true;
+            renderWord();
+        }
+    }
+
+    function handleFastModeAnswer(selectedBtn, isTimeout = false) {
+        clearInterval(timerInterval);
+        clearTimeout(pauseTimeout);
+        if(isHistoryView) return;
+        
+        recordWordSeen(currentWord.ar);
+        
+        const feedback = document.getElementById('feedback');
+        const isCorrect = selectedBtn && selectedBtn.innerText === currentWord.ar;
+
+        document.querySelectorAll('.option-btn').forEach(b => {
+            b.disabled = true;
+            b.style.borderColor = 'transparent';
+            if (b.innerText === currentWord.ar) {
+                b.style.backgroundColor = '#27ae60'; 
+                b.style.color = '#fff';
+            } else if (b === selectedBtn && !isCorrect) {
+                b.style.backgroundColor = '#e74c3c';
+                b.style.color = '#fff';
+            }
+        });
+
+        if (isCorrect) {
+            let speedBonus = timeLeft * 10;
+            let points = (100 + speedBonus) * multiplier;
+            score += points;
+            combo++;
+            if (combo > 0 && combo % 3 === 0) multiplier++;
+            
+            feedback.innerHTML = `<span style="color:#27ae60;">✅ +${points} очков!</span>`;
+        } else {
+            lives--;
+            combo = 0;
+            multiplier = 1;
+            
+            let errorMsg = isTimeout ? 'Время вышло!' : 'Ошибка!';
+            feedback.innerHTML = `❌ ${errorMsg} Правильно: <br><span class="arabic-text" style="color:#2c3e50; font-size:24px;">${currentWord.ar}</span>`;
+            feedback.className = 'incorrect';
+        }
+
+        updateFastModeUI();
+
+        if (lives <= 0) {
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('medina_highscore_vol1_perfect', highScore);
+                document.getElementById('highscore-val').innerText = highScore;
+            }
+            
+            feedback.innerHTML += `<br><br><span style="color:#e74c3c;"><b>💀 ИГРА ОКОНЧЕНА! Счет: ${score}</b></span>`;
+            document.getElementById('next-btn').innerText = 'Начать заново';
+            document.getElementById('next-btn').classList.remove('hidden');
+        } else {
+            pauseTimeout = setTimeout(nextWord, 1500);
+        }
+    }
+
+    function createOptionButtons(options, correctAnswer, isArabic) {
+        const container = document.getElementById('options-container');
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.innerText = opt;
+            btn.className = 'option-btn' + (isArabic ? ' arabic-option' : '');
+            
+            btn.onclick = () => {
+                if (isHistoryView) return;
+                
+                if (activeMode === 'fast') {
+                    handleFastModeAnswer(btn, false);
+                } else {
+                    recordWordSeen(currentWord.ar);
+
+                    document.querySelectorAll('.option-btn').forEach(b => {
+                        b.disabled = true;
+                        b.style.borderColor = 'transparent';
+                    });
+
+                    const feedback = document.getElementById('feedback');
+                    if (opt === correctAnswer) {
+                        btn.style.backgroundColor = '#27ae60';
+                        btn.style.color = '#fff';
+                        feedback.innerText = '✅ Правильно!';
+                        feedback.className = 'correct';
+                        pauseTimeout = setTimeout(nextWord, 1000); 
+                    } else {
+                        btn.style.backgroundColor = '#e74c3c';
+                        btn.style.color = '#fff';
+                        feedback.innerHTML = `❌ Ошибка. Правильно: <br><br><span class="${isArabic ? 'arabic-text' : ''}" style="color:#2c3e50; font-size:24px;">${correctAnswer}</span>`;
+                        feedback.className = 'incorrect';
+                        document.getElementById('next-btn').classList.remove('hidden');
+                        pauseTimeout = setTimeout(nextWord, 1500);
+                    }
+                }
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    function checkTypedAnswer() {
+        if(isHistoryView) return;
+        
+        recordWordSeen(currentWord.ar);
+
+        const feedback = document.getElementById('feedback');
+        const cleanCorrectAr = currentWord.ar.replace(/\s*\(.*?\)\s*/g, '');
+        const userAnswer = removeHarakat(document.getElementById('answer-input').value);
+        const correctAnswer = removeHarakat(cleanCorrectAr);
+        
+        if (userAnswer === correctAnswer) {
+            feedback.innerText = '✅ Правильно!';
+            feedback.className = 'correct';
+            pauseTimeout = setTimeout(nextWord, 1000);
+        } else {
+            feedback.innerHTML = `❌ Ошибка. Правильно: <span class="arabic-text" style="color:#2c3e50;">${cleanCorrectAr}</span>`;
+            feedback.className = 'incorrect';
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+        document.getElementById('check-btn').classList.add('hidden');
+    }
+
+    function handleNextClick() {
+        if (mode === 'fast' && lives <= 0) {
+            resetFastMode();
+        }
+        if (isHistoryView) {
+            historyStack = historyStack.slice(0, historyIdx + 1);
+        }
+        nextWord();
+    }
+
+    function backToSetup() {
+        clearInterval(timerInterval);
+        clearTimeout(pauseTimeout);
+        document.getElementById('quiz-section').style.display = 'none';
+        document.getElementById('setup-section').style.display = 'block';
+    }
+
+    document.getElementById('answer-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            if (document.getElementById('check-btn').classList.contains('hidden')) {
+                handleNextClick();
+            } else {
+                checkTypedAnswer();
+            }
+        }
+    });
+
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !document.getElementById('next-btn').classList.contains('hidden') && activeMode !== 'type-ar') {
+            handleNextClick();
+        }
+    });
+</script>
+
+</body>
+</html>
